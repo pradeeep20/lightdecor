@@ -3,82 +3,181 @@
 
 import React, { useEffect, useState } from "react";
 
-const carouselImages = [
-  {
-    id: 1,
-    src: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1500&q=80",
-    caption: "Ambient glow for intimate celebrations",
-  },
-  {
-    id: 2,
-    src: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1500&q=80",
-    caption: "Luxury chandeliers that elevate spaces",
-  },
-  {
-    id: 3,
-    src: "https://images.unsplash.com/photo-1440428099904-c6d459a7e7b1?auto=format&fit=crop&w=1500&q=80",
-    caption: "Statement decor with a modern flair",
-  },
-];
+type RecentWorkImage = {
+  filename: string;
+  sequence: number;
+  src: string;
+};
 
-const Page: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+const HomePage: React.FC = () => {
+  const [recentWorkImages, setRecentWorkImages] = useState<RecentWorkImage[]>([]);
+  const [isLoadingRecentWork, setIsLoadingRecentWork] = useState(true);
+  const [recentWorkError, setRecentWorkError] = useState<string | null>(null);
 
+  const howItWorksSteps = [
+    {
+      title: "Customer Contact",
+      img: "https://images.unsplash.com/photo-1581091870625-d4bcd4476bb4?auto=format&fit=crop&w=400&q=80",
+      desc: "Reach out to us via phone, email, or enquiry form.",
+    },
+    {
+      title: "Requirement Discussion",
+      img: "https://images.unsplash.com/photo-1573164574391-1c9a1130fca1?auto=format&fit=crop&w=400&q=80",
+      desc: "We discuss your vision, event type and requirements.",
+    },
+    {
+      title: "Planning",
+      img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80",
+      desc: "Our team designs lighting & decor plans tailored for you.",
+    },
+    {
+      title: "Execution",
+      img: "https://images.unsplash.com/photo-1505691723518-22f3a7a79ef4?auto=format&fit=crop&w=400&q=80",
+      desc: "We set up lighting & decoration on event day efficiently.",
+    },
+    {
+      title: "Delivery",
+      img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80",
+      desc: "Event is completed, leaving a memorable experience.",
+    },
+  ];
+
+  const [currentWork, setCurrentWork] = useState(0);
   useEffect(() => {
-    const intervalId = setInterval(
-      () => setCurrentSlide((prev) => (prev + 1) % carouselImages.length),
-      6000
-    );
-    return () => clearInterval(intervalId);
+    const fetchRecentWork = async () => {
+      try {
+        const response = await fetch("/api/recent-work");
+        if (!response.ok) {
+          throw new Error("Failed to load images");
+        }
+        const data = await response.json();
+        setRecentWorkImages(Array.isArray(data.images) ? data.images : []);
+      } catch (error) {
+        console.error("Error fetching recent work images:", error);
+        setRecentWorkError("Unable to load recent work at the moment.");
+      } finally {
+        setIsLoadingRecentWork(false);
+      }
+    };
+
+    fetchRecentWork();
   }, []);
 
+  useEffect(() => {
+    if (!recentWorkImages.length) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentWork((prev) => (prev + 1) % recentWorkImages.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [recentWorkImages.length]);
+
   return (
-    <div style={styles.page}>
-      {/* Hero Section */}
-      <section style={styles.hero}>
-        <div>
-          <p style={styles.heroEyebrow}>Lighting Concepts · Décor Experiences</p>
-          <h1 style={styles.heroTitle}>Make every event shimmer</h1>
-          <p style={styles.heroCopy}>
-            Bespoke lighting installations curated with handcrafted fixtures, soft gradients, and a contemporary palette that adapts
-            beautifully on any screen size.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#0f172a] text-white font-sans">
+
+      {/* ================= Hero / Intro Section ================= */}
+      <section className="px-6 md:px-20 py-16 bg-linear-to-r from-[#1e293b]/80 via-[#0f172a]/70 to-[#1e293b]/80 rounded-b-3xl">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Make Every Event Shine</h1>
+        <p className="mb-3 text-gray-300">
+          We provide top-notch lighting and decoration services to turn your events into memorable experiences.
+        </p>
+        <p className="mb-6 text-gray-400">
+          Our mission is to create beautiful, ambient, and elegant spaces that captivate your guests.
+        </p>
+        <button className="bg-yellow-500 text-black font-semibold px-6 py-3 rounded-md hover:bg-yellow-400 transition">
+          Submit Inquiry
+        </button>
       </section>
 
-      {/* Carousel Section */}
-      <section style={styles.carouselSection}>
-        <div style={styles.carousel}>
-          <div
-            style={{
-              ...styles.carouselTrack,
-              transform: `translateX(-${currentSlide * 100}%)`,
-            }}
-          >
-            {carouselImages.map((image) => (
+      {/* ================= Our Recent Work Section ================= */}
+      <section className="px-6 md:px-20 py-16">
+        <h2 className="text-3xl font-semibold mb-8">Our Recent Work →</h2>
+
+        {isLoadingRecentWork ? (
+          <p className="text-gray-400">Loading recent work...</p>
+        ) : recentWorkError ? (
+          <p className="text-red-400">{recentWorkError}</p>
+        ) : recentWorkImages.length === 0 ? (
+          <p className="text-gray-400">Add images to /public/images/recent-work to showcase your latest projects.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {recentWorkImages.map((img, idx) => (
               <div
-                key={image.id}
-                style={{
-                  ...styles.slide,
-                  backgroundImage: `linear-gradient(120deg, rgba(0,0,0,0.6), rgba(0,0,0,0.25)), url(${image.src})`,
-                }}
+                key={img.filename}
+                className={`rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-lg transition-all duration-500 ${
+                  currentWork === idx ? "scale-100 opacity-100" : "scale-[0.98] opacity-80"
+                }`}
               >
-                <p style={styles.slideCaption}>{image.caption}</p>
+                <img src={img.src} alt={`Recent work ${img.sequence}`} className="w-full h-48 object-cover" />
+                <div className="p-4 border-t border-white/10">
+                  <p className="text-sm text-gray-300 tracking-wide">
+                    Sequence #{img.sequence.toString().padStart(2, "0")}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
+        )}
+
+        <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+          Explore More
+        </button>
+      </section>
+
+      {/* ================= Statistics Section ================= */}
+      <section className="px-6 md:px-20 py-16 bg-[#1e293b] rounded-3xl flex flex-col md:flex-row items-center justify-around gap-6">
+        <div className="text-center">
+          <h3 className="text-4xl font-bold">2000+</h3>
+          <p className="text-gray-300">Total Customers Served</p>
         </div>
-        <div style={styles.dots}>
-          {carouselImages.map((image, index) => (
-            <button
-              key={image.id}
-              onClick={() => setCurrentSlide(index)}
-              style={{
-                ...styles.dot,
-                opacity: currentSlide === index ? 1 : 0.3,
-              }}
-              aria-label={`Go to slide ${index + 1}`}
-            />
+        <div className="text-center">
+          <h3 className="text-4xl font-bold">4000+</h3>
+          <p className="text-gray-300">Total Inquiries Received</p>
+        </div>
+      </section>
+
+      {/* ================= Customer Reviews Section ================= */}
+      <section className="px-6 md:px-20 py-16">
+        <h2 className="text-3xl font-semibold mb-8">Customer Reviews →</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
+            <p className="text-gray-300 mb-2">
+              "Amazing lighting and decoration! Made our wedding unforgettable."
+            </p>
+            <span className="text-yellow-400 font-semibold">– Priya S.</span>
+          </div>
+          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
+            <p className="text-gray-300 mb-2">
+              "Professional team and great attention to detail. Highly recommended!"
+            </p>
+            <span className="text-yellow-400 font-semibold">– Rohit K.</span>
+          </div>
+          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
+            <p className="text-gray-300 mb-2">
+              "They transformed our corporate event space completely. Loved it!"
+            </p>
+            <span className="text-yellow-400 font-semibold">– Anjali M.</span>
+          </div>
+        </div>
+        <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+          Explore More
+        </button>
+      </section>
+
+      {/* ================= How It Works Section ================= */}
+      <section className="px-6 md:px-20 py-16 bg-[#1e293b] rounded-3xl">
+        <h2 className="text-3xl font-semibold mb-12 text-center">How It Works →</h2>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
+          {howItWorksSteps.map((step, idx) => (
+            <div key={idx} className="bg-[#243045] p-4 rounded-xl shadow-md text-center flex flex-col items-center">
+              <img src={step.img} alt={step.title} className="w-24 h-24 object-cover rounded-full mb-3" />
+              <h3 className="font-semibold mb-1">{step.title}</h3>
+              <p className="text-gray-300 text-sm">{step.desc}</p>
+              {idx < 4 && <span className="text-yellow-500 text-2xl mt-2">→</span>}
+            </div>
           ))}
         </div>
       </section>
@@ -86,90 +185,4 @@ const Page: React.FC = () => {
   );
 };
 
-const styles: { [key: string]: React.CSSProperties } = {
-  page: {
-    minHeight: "100vh",
-    backgroundColor: "#0f172a",
-    color: "#f8fafc",
-    fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    padding: "40px clamp(20px, 6vw, 80px)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "32px",
-  },
-  hero: {
-    display: "grid",
-    gap: "16px",
-    background:
-      "linear-gradient(135deg, rgba(248, 250, 252, 0.02), rgba(251, 191, 36, 0.05))",
-    borderRadius: "24px",
-    padding: "36px",
-    border: "1px solid rgba(255, 255, 255, 0.06)",
-  },
-  heroEyebrow: {
-    margin: 0,
-    letterSpacing: "0.4em",
-    fontSize: "0.75rem",
-    textTransform: "uppercase",
-    color: "rgba(248, 250, 252, 0.6)",
-  },
-  heroTitle: {
-    margin: 0,
-    fontSize: "clamp(2rem, 4vw, 3rem)",
-    lineHeight: 1.2,
-  },
-  heroCopy: {
-    margin: 0,
-    maxWidth: "620px",
-    color: "rgba(248, 250, 252, 0.75)",
-    fontSize: "1rem",
-  },
-  carouselSection: {
-    background: "rgba(15, 23, 42, 0.85)",
-    borderRadius: "24px",
-    padding: "32px clamp(24px, 4vw, 48px)",
-    border: "1px solid rgba(255, 255, 255, 0.05)",
-    boxShadow: "0 25px 60px rgba(2, 6, 23, 0.65)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  carousel: {
-    overflow: "hidden",
-    borderRadius: "18px",
-  },
-  carouselTrack: {
-    display: "flex",
-    transition: "transform 600ms ease",
-  },
-  slide: {
-    minWidth: "100%",
-    height: "320px",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    display: "flex",
-    alignItems: "flex-end",
-    padding: "24px",
-  },
-  slideCaption: {
-    margin: 0,
-    fontSize: "1.2rem",
-    fontWeight: 500,
-  },
-  dots: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "12px",
-  },
-  dot: {
-    width: "10px",
-    height: "10px",
-    borderRadius: "999px",
-    border: "none",
-    backgroundColor: "#fbbf24",
-    cursor: "pointer",
-    transition: "opacity 200ms ease",
-  },
-};
-
-export default Page;
+export default HomePage;

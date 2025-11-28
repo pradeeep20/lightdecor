@@ -1,0 +1,26 @@
+import React, { InputHTMLAttributes } from "react";
+
+interface MyInputProp extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+}
+
+const MyInput: React.FC<MyInputProp> = (props) => {
+  const label = props.label;
+  const error = props.error;
+  return (
+    <div className="flex flex-col">
+      {label && <label className="text-gray-500 text-sm">{label}</label>}
+      <input
+        {...props}
+        className="border border-blue-600 rounded-md p-2 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500
+         placeholder-gray-400 placeholder:text-sm text-blue-600"
+      />
+
+      {error && <span className="text-red-500 text-sm">{error}</span>}
+      
+    </div>
+  );
+};
+
+export default MyInput;
