@@ -35,7 +35,7 @@ export default function ButtonsCollection() {
       {/* 1. Gradient Button */}
       <Button
         onClick={() => {}}
-        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
+        className="bg-linear-to-r from-purple-500 to-pink-500 hover:opacity-90"
       >
         Gradient Button
       </Button>
