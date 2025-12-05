@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type RecentWorkImage = {
   filename: string;
@@ -10,92 +11,65 @@ type RecentWorkImage = {
 };
 
 const HomePage: React.FC = () => {
+  const router = useRouter();
   const [recentWorkImages, setRecentWorkImages] = useState<RecentWorkImage[]>([]);
   const [isLoadingRecentWork, setIsLoadingRecentWork] = useState(true);
   const [recentWorkError, setRecentWorkError] = useState<string | null>(null);
 
   const howItWorksSteps = [
-    {
-      title: "Customer Contact",
-      img: "https://images.unsplash.com/photo-1581091870625-d4bcd4476bb4?auto=format&fit=crop&w=400&q=80",
-      desc: "Reach out to us via phone, email, or enquiry form.",
-    },
-    {
-      title: "Requirement Discussion",
-      img: "https://images.unsplash.com/photo-1573164574391-1c9a1130fca1?auto=format&fit=crop&w=400&q=80",
-      desc: "We discuss your vision, event type and requirements.",
-    },
-    {
-      title: "Planning",
-      img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80",
-      desc: "Our team designs lighting & decor plans tailored for you.",
-    },
-    {
-      title: "Execution",
-      img: "https://images.unsplash.com/photo-1505691723518-22f3a7a79ef4?auto=format&fit=crop&w=400&q=80",
-      desc: "We set up lighting & decoration on event day efficiently.",
-    },
-    {
-      title: "Delivery",
-      img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80",
-      desc: "Event is completed, leaving a memorable experience.",
-    },
+    { title: "Customer Contact", img: "https://images.unsplash.com/photo-1581091870625-d4bcd4476bb4?auto=format&fit=crop&w=400&q=80", desc: "Reach out to us via phone, email, or enquiry form." },
+    { title: "Requirement Discussion", img: "https://images.unsplash.com/photo-1573164574391-1c9a1130fca1?auto=format&fit=crop&w=400&q=80", desc: "We discuss your vision, event type and requirements." },
+    { title: "Planning", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80", desc: "Our team designs lighting & decor plans tailored for you." },
+    { title: "Execution", img: "https://images.unsplash.com/photo-1505691723518-22f3a7a79ef4?auto=format&fit=crop&w=400&q=80", desc: "We set up lighting & decoration on event day efficiently." },
+    { title: "Delivery", img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80", desc: "Event is completed, leaving a memorable experience." },
   ];
 
   const [currentWork, setCurrentWork] = useState(0);
+
+  // Fetch recent work images
   useEffect(() => {
     const fetchRecentWork = async () => {
       try {
         const response = await fetch("/api/recent-work");
-        if (!response.ok) {
-          throw new Error("Failed to load images");
-        }
+        if (!response.ok) throw new Error("Failed to load images");
         const data = await response.json();
-        setRecentWorkImages(Array.isArray(data.images) ? data.images : []);
+        // Reverse order: last image first
+        setRecentWorkImages(Array.isArray(data.images) ? data.images.reverse() : []);
       } catch (error) {
-        console.error("Error fetching recent work images:", error);
+        console.error(error);
         setRecentWorkError("Unable to load recent work at the moment.");
       } finally {
         setIsLoadingRecentWork(false);
       }
     };
-
     fetchRecentWork();
   }, []);
 
+  // Auto-slide carousel
   useEffect(() => {
-    if (!recentWorkImages.length) {
-      return;
-    }
-
+    if (!recentWorkImages.length) return;
     const interval = setInterval(() => {
       setCurrentWork((prev) => (prev + 1) % recentWorkImages.length);
     }, 4000);
-
     return () => clearInterval(interval);
   }, [recentWorkImages.length]);
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white font-sans">
 
-      {/* ================= Hero / Intro Section ================= */}
-      <section className="px-6 md:px-20 py-16 bg-linear-to-r from-[#1e293b]/80 via-[#0f172a]/70 to-[#1e293b]/80 rounded-b-3xl">
+      {/* Hero Section */}
+      <section className="px-6 md:px-20 py-16 bg-gradient-to-r from-[#1e293b]/80 via-[#0f172a]/70 to-[#1e293b]/80 rounded-b-3xl">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Make Every Event Shine</h1>
-        <p className="mb-3 text-gray-300">
-          We provide top-notch lighting and decoration services to turn your events into memorable experiences.
-        </p>
-        <p className="mb-6 text-gray-400">
-          Our mission is to create beautiful, ambient, and elegant spaces that captivate your guests.
-        </p>
+        <p className="mb-3 text-gray-300">We provide top-notch lighting and decoration services to turn your events into memorable experiences.</p>
+        <p className="mb-6 text-gray-400">Our mission is to create beautiful, ambient, and elegant spaces that captivate your guests.</p>
         <button className="bg-yellow-500 text-black font-semibold px-6 py-3 rounded-md hover:bg-yellow-400 transition">
           Submit Inquiry
         </button>
       </section>
 
-      {/* ================= Our Recent Work Section ================= */}
+      {/* Recent Work Section */}
       <section className="px-6 md:px-20 py-16">
         <h2 className="text-3xl font-semibold mb-8">Our Recent Work →</h2>
-
         {isLoadingRecentWork ? (
           <p className="text-gray-400">Loading recent work...</p>
         ) : recentWorkError ? (
@@ -113,61 +87,21 @@ const HomePage: React.FC = () => {
               >
                 <img src={img.src} alt={`Recent work ${img.sequence}`} className="w-full h-48 object-cover" />
                 <div className="p-4 border-t border-white/10">
-                  <p className="text-sm text-gray-300 tracking-wide">
-                    Sequence #{img.sequence.toString().padStart(2, "0")}
-                  </p>
+                  <p className="text-sm text-gray-300 tracking-wide">Sequence #{img.sequence.toString().padStart(2, "0")}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
-
-        <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+        <button
+          onClick={() => router.push("/recent-work")}
+          className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition"
+        >
           Explore More
         </button>
       </section>
 
-      {/* ================= Statistics Section ================= */}
-      <section className="px-6 md:px-20 py-16 bg-[#1e293b] rounded-3xl flex flex-col md:flex-row items-center justify-around gap-6">
-        <div className="text-center">
-          <h3 className="text-4xl font-bold">2000+</h3>
-          <p className="text-gray-300">Total Customers Served</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-4xl font-bold">4000+</h3>
-          <p className="text-gray-300">Total Inquiries Received</p>
-        </div>
-      </section>
-
-      {/* ================= Customer Reviews Section ================= */}
-      <section className="px-6 md:px-20 py-16">
-        <h2 className="text-3xl font-semibold mb-8">Customer Reviews →</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
-            <p className="text-gray-300 mb-2">
-              "Amazing lighting and decoration! Made our wedding unforgettable."
-            </p>
-            <span className="text-yellow-400 font-semibold">– Priya S.</span>
-          </div>
-          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
-            <p className="text-gray-300 mb-2">
-              "Professional team and great attention to detail. Highly recommended!"
-            </p>
-            <span className="text-yellow-400 font-semibold">– Rohit K.</span>
-          </div>
-          <div className="bg-[#243045] p-6 rounded-xl shadow-md">
-            <p className="text-gray-300 mb-2">
-              "They transformed our corporate event space completely. Loved it!"
-            </p>
-            <span className="text-yellow-400 font-semibold">– Anjali M.</span>
-          </div>
-        </div>
-        <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
-          Explore More
-        </button>
-      </section>
-
-      {/* ================= How It Works Section ================= */}
+      {/* How It Works Section */}
       <section className="px-6 md:px-20 py-16 bg-[#1e293b] rounded-3xl">
         <h2 className="text-3xl font-semibold mb-12 text-center">How It Works →</h2>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
@@ -181,6 +115,7 @@ const HomePage: React.FC = () => {
           ))}
         </div>
       </section>
+
     </div>
   );
 };
