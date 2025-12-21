@@ -1,68 +1,36 @@
 "use client";
 
-import React from "react";
+import Link from "next/link";
 
-const ServicesPage: React.FC = () => (
-  <div style={styles.page}>
-    <main style={styles.main}>
-      <section style={styles.content}>
-        <h1 style={styles.title}>Services</h1>
-        <p style={styles.paragraph}>
-          Discover our comprehensive range of lighting solutions, from custom installations to event decor, designed to transform any space into a captivating experience.
-        </p>
-      </section>
-    </main>
-    <footer style={styles.footer}>
-      {/* Footer content will be added here */}
-    </footer>
-  </div>
-);
+const services = [
+  { name: "Wedding Decoration", slug: "wedding" },
+  { name: "Birthday Decoration", slug: "birthday" },
+  { name: "Corporate Event", slug: "corporate" },
+  { name: "Festival Lighting", slug: "festival" },
+  { name: "Sound & DJ Setup", slug: "dj" },
+];
 
-const styles: { [key: string]: React.CSSProperties } = {
-  page: {
-    minHeight: "100vh",
-    backgroundColor: "#0f172a",
-    color: "#f8fafc",
-    fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
-    display: "flex",
-    flexDirection: "column",
-  },
-  main: {
-    flex: 1,
-    padding: "64px clamp(24px, 6vw, 80px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    maxWidth: "1200px",
-    width: "100%",
-    textAlign: "center",
-  },
-  title: {
-    margin: 0,
-    fontSize: "clamp(2rem, 4vw, 3rem)",
-    fontWeight: 600,
-    color: "#f8fafc",
-    marginBottom: "24px",
-  },
-  paragraph: {
-    margin: 0,
-    fontSize: "clamp(1rem, 2vw, 1.125rem)",
-    lineHeight: 1.7,
-    color: "rgba(248, 250, 252, 0.8)",
-    maxWidth: "720px",
-    marginLeft: "auto",
-    marginRight: "auto",
-  },
-  footer: {
-    padding: "32px clamp(24px, 6vw, 80px)",
-    background: "rgba(15, 23, 42, 0.85)",
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-    textAlign: "center",
-    color: "rgba(248, 250, 252, 0.6)",
-  },
-};
+export default function ServicesPage() {
+  return (
+    <div className="min-h-screen bg-[#0f172a] text-white px-6 py-16">
+      <h1 className="text-4xl font-bold text-center mb-12">Our Services</h1>
 
-export default ServicesPage;
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {services.map((service) => (
+          <Link
+            key={service.slug}
+            href={`/services/${service.slug}`}
+            className="bg-[#1e293b] border border-white/10 rounded-xl p-10 text-center hover:bg-[#243045] hover:scale-105 transition"
+          >
+            <h2 className="text-xl font-semibold text-yellow-400">
+              {service.name}
+            </h2>
+            <p className="mt-3 text-sm text-white/70">
+              Click to view photos & videos
+            </p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
