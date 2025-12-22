@@ -5,11 +5,11 @@ import React, { useState, useEffect } from "react";
 const slides = [
   {
     type: "image",
-    src: "/images/recent-work/placeholder-2.png",
+    src: "/images/recent-work/2.png",
   },
   {
     type: "video",
-    src: "/images/recent-work/VID20251015191830.mp4",
+    src: "/images/Festival-Decoration/VID20251015191830.mp4",
   },
 ];
 
